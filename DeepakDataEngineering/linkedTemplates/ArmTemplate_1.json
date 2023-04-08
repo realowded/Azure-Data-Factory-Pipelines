@@ -853,7 +853,7 @@
 							},
 							"activities": [
 								{
-									"name": "Copy data2",
+									"name": "CopyToDatbase",
 									"type": "Copy",
 									"dependsOn": [],
 									"policy": {
