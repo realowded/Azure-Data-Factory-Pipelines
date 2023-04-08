@@ -1,0 +1,9 @@
+{
+	"name": "DeepakDataEngineering",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "5885a8b0-f69f-4f69-83d1-b3b3a4c0eb69",
+		"tenantId": "b13ba5c1-cb24-48a4-8048-81769898a7c4"
+	}
+}

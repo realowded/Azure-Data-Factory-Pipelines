@@ -1,0 +1,163 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "NewestFile",
+						"type": "DatasetReference"
+					},
+					"name": "NewestFile"
+				},
+				{
+					"dataset": {
+						"referenceName": "DW_TABLE",
+						"type": "DatasetReference"
+					},
+					"name": "DwTable"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DW_TABLE",
+						"type": "DatasetReference"
+					},
+					"name": "DwTable0"
+				},
+				{
+					"dataset": {
+						"referenceName": "DW_TABLE",
+						"type": "DatasetReference"
+					},
+					"name": "DwTableInsert"
+				}
+			],
+			"transformations": [
+				{
+					"name": "OddCustID"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "CheckIfExist"
+				},
+				{
+					"name": "IfExist"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "ActiveFlag"
+				},
+				{
+					"name": "AllowInsert"
+				},
+				{
+					"name": "ActiveFlag0"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CustomerID as short,",
+				"          NameStyle as boolean,",
+				"          Title as string,",
+				"          FirstName as string,",
+				"          MiddleName as string,",
+				"          LastName as string,",
+				"          Suffix as string,",
+				"          CompanyName as string,",
+				"          SalesPerson as string,",
+				"          EmailAddress as string,",
+				"          Phone as string,",
+				"          PasswordHash as string,",
+				"          PasswordSalt as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> NewestFile",
+				"source(output(",
+				"          CID as integer,",
+				"          Name as string,",
+				"          MailID as integer,",
+				"          Active_Flag as integer",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> DwTable",
+				"NewestFile filter(CustomerID%2!=0) ~> OddCustID",
+				"DwTable select(mapColumn(",
+				"          CID,",
+				"          Db_Active_Flag = Active_Flag",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"OddCustID, select1 lookup(CustomerID == CID,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> CheckIfExist",
+				"CheckIfExist filter(!isNull(CID)) ~> IfExist",
+				"IfExist select(mapColumn(",
+				"          CustomerID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 derive(Active_Flag = 0) ~> ActiveFlag",
+				"ActiveFlag alterRow(updateIf(1==1)) ~> AllowInsert",
+				"OddCustID derive(Active_Flag = 1) ~> ActiveFlag0",
+				"AllowInsert sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          CID as integer,",
+				"          Name as string,",
+				"          MailID as integer,",
+				"          Active_Flag as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['CID'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          CID = CustomerID,",
+				"          Active_Flag",
+				"     )) ~> DwTable0",
+				"ActiveFlag0 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          CID as integer,",
+				"          Name as string,",
+				"          MailID as integer,",
+				"          Active_Flag as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 2,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          CID = CustomerID,",
+				"          Name = FirstName,",
+				"          MailID = EmailAddress,",
+				"          Active_Flag",
+				"     )) ~> DwTableInsert"
+			]
+		}
+	}
+}

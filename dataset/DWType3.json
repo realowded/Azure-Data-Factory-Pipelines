@@ -1,0 +1,39 @@
+{
+	"name": "DWType3",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SQL_DB_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Name",
+				"type": "varchar"
+			},
+			{
+				"name": "EmailID",
+				"type": "varchar"
+			},
+			{
+				"name": "PreviousName_0",
+				"type": "varchar"
+			},
+			{
+				"name": "PreviousName_1",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Type3"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

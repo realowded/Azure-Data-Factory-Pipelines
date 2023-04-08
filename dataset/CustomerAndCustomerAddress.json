@@ -1,0 +1,17 @@
+{
+	"name": "CustomerAndCustomerAddress",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SQL_DB_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "salesLt",
+			"table": "CustomerInfo"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

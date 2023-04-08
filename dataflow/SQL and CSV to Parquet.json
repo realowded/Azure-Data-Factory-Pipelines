@@ -1,0 +1,118 @@
+{
+	"name": "SQL and CSV to Parquet",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "SDQL_DB_DS",
+						"type": "DatasetReference"
+					},
+					"name": "CutomerSQLDS"
+				},
+				{
+					"dataset": {
+						"referenceName": "Sale_CustomerAddress_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "CustomerAddressCsv"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "CustomerInfoParquet",
+						"type": "DatasetReference"
+					},
+					"name": "ParquetOutput"
+				}
+			],
+			"transformations": [
+				{
+					"name": "JoinCutomerandCustomerAddresss"
+				},
+				{
+					"name": "Ascending"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "filter1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CustomerID as integer,",
+				"          NameStyle as boolean,",
+				"          Title as string,",
+				"          FirstName as string,",
+				"          MiddleName as string,",
+				"          LastName as string,",
+				"          Suffix as string,",
+				"          CompanyName as string,",
+				"          SalesPerson as string,",
+				"          EmailAddress as string,",
+				"          Phone as string,",
+				"          PasswordHash as string,",
+				"          PasswordSalt as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> CutomerSQLDS",
+				"source(output(",
+				"          CustomerID as integer,",
+				"          AddressID as string,",
+				"          AddressType as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> CustomerAddressCsv",
+				"CutomerSQLDS, CustomerAddressCsv join(CutomerSQLDS@CustomerID == CustomerAddressCsv@CustomerID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> JoinCutomerandCustomerAddresss",
+				"filter1 sort(asc(CustomerID, true)) ~> Ascending",
+				"JoinCutomerandCustomerAddresss select(mapColumn(",
+				"          CustomerID = CutomerSQLDS@CustomerID,",
+				"          NameStyle,",
+				"          Title,",
+				"          FirstName,",
+				"          MiddleName,",
+				"          LastName,",
+				"          Suffix,",
+				"          CompanyName,",
+				"          SalesPerson,",
+				"          EmailAddress,",
+				"          Phone,",
+				"          PasswordHash,",
+				"          PasswordSalt,",
+				"          Customerrowguid = CutomerSQLDS@rowguid,",
+				"          CustomerModifiedDate = CutomerSQLDS@ModifiedDate,",
+				"          AddressID,",
+				"          AddressType,",
+				"          Addressrowguid = CustomerAddressCsv@rowguid,",
+				"          AddressModifiedDate = CustomerAddressCsv@ModifiedDate",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 filter(CustomerID<20000000) ~> filter1",
+				"Ascending sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ParquetOutput"
+			]
+		}
+	}
+}

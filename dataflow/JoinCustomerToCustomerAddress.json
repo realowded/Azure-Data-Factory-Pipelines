@@ -1,0 +1,75 @@
+{
+	"name": "JoinCustomerToCustomerAddress",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Sale_CustomerAddress_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "CustomerAddress"
+				},
+				{
+					"dataset": {
+						"referenceName": "Sale_CustomerAddress_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "Customer"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "CustomerAndCustomerAddress",
+						"type": "DatasetReference"
+					},
+					"name": "CustomerAndCustomerAddress"
+				}
+			],
+			"transformations": [
+				{
+					"name": "JoinCustomerToCustomerAddress"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CustomerID as integer,",
+				"          AddressID as string,",
+				"          AddressType as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> CustomerAddress",
+				"source(output(",
+				"          CustomerID as integer,",
+				"          AddressID as string,",
+				"          AddressType as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> Customer",
+				"CustomerAddress, Customer join(CustomerAddress@CustomerID == Customer@CustomerID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> JoinCustomerToCustomerAddress",
+				"JoinCustomerToCustomerAddress sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> CustomerAndCustomerAddress"
+			]
+		}
+	}
+}

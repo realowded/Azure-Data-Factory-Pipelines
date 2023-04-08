@@ -1,0 +1,223 @@
+{
+	"name": "dataflow2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Type3DS",
+						"type": "DatasetReference"
+					},
+					"name": "Type3Data"
+				},
+				{
+					"dataset": {
+						"referenceName": "DWType3",
+						"type": "DatasetReference"
+					},
+					"name": "DWType3"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DWType3",
+						"type": "DatasetReference"
+					},
+					"name": "UpdatePreviousName1"
+				},
+				{
+					"dataset": {
+						"referenceName": "DWType3",
+						"type": "DatasetReference"
+					},
+					"name": "UpdatePreviousName0"
+				},
+				{
+					"dataset": {
+						"referenceName": "DWType3",
+						"type": "DatasetReference"
+					},
+					"name": "UpdateCurrentName"
+				},
+				{
+					"dataset": {
+						"referenceName": "DWType3",
+						"type": "DatasetReference"
+					},
+					"name": "InsertNewRecords"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "ExistingCustomer"
+				},
+				{
+					"name": "SelectCurrentName"
+				},
+				{
+					"name": "SelectPreviousName"
+				},
+				{
+					"name": "SelectNewName"
+				},
+				{
+					"name": "AllowUpdateName1"
+				},
+				{
+					"name": "AllowUpdateName0"
+				},
+				{
+					"name": "AllowUpdateCurrentName"
+				},
+				{
+					"name": "FilterNEwRecord"
+				},
+				{
+					"name": "SelectNewRecords"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CID as integer,",
+				"          Name as string,",
+				"          EmailID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> Type3Data",
+				"source(output(",
+				"          CID as integer,",
+				"          Name as string,",
+				"          EmailID as string,",
+				"          PreviousName_0 as string,",
+				"          PreviousName_1 as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> DWType3",
+				"Type3Data, DWType3 lookup(Type3Data@CID == DWType3@CID,",
+				"     multiple: false,",
+				"     pickup: 'first',",
+				"     asc(DWType3@CID, true),",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 filter(!isNull(DWType3@CID)) ~> ExistingCustomer",
+				"ExistingCustomer select(mapColumn(",
+				"          CID = DWType3@CID,",
+				"          PreviousName = DWType3@Name",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectCurrentName",
+				"ExistingCustomer select(mapColumn(",
+				"          CID = DWType3@CID,",
+				"          PreviousName_1 = PreviousName_0",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectPreviousName",
+				"ExistingCustomer select(mapColumn(",
+				"          CID = Type3Data@CID,",
+				"          Name = Type3Data@Name",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectNewName",
+				"SelectPreviousName alterRow(updateIf(1==1)) ~> AllowUpdateName1",
+				"SelectCurrentName alterRow(updateIf(1==1),",
+				"     insertIf(1==1)) ~> AllowUpdateName0",
+				"SelectNewName alterRow(updateIf(1==1)) ~> AllowUpdateCurrentName",
+				"lookup1 filter(isNull(DWType3@CID)) ~> FilterNEwRecord",
+				"FilterNEwRecord select(mapColumn(",
+				"          CID = Type3Data@CID,",
+				"          Name = Type3Data@Name,",
+				"          EmailID = Type3Data@EmailID,",
+				"          PreviousName_0,",
+				"          PreviousName_1",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectNewRecords",
+				"AllowUpdateName1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          CID as integer,",
+				"          Name as string,",
+				"          EmailID as string,",
+				"          PreviousName_0 as string,",
+				"          PreviousName_1 as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['CID'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> UpdatePreviousName1",
+				"AllowUpdateName0 sink(allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     input(",
+				"          CID as integer,",
+				"          Name as string,",
+				"          EmailID as string,",
+				"          PreviousName_0 as string,",
+				"          PreviousName_1 as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['CID'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 2,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          CID,",
+				"          PreviousName_0 = PreviousName",
+				"     )) ~> UpdatePreviousName0",
+				"AllowUpdateCurrentName sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          CID as integer,",
+				"          Name as string,",
+				"          EmailID as string,",
+				"          PreviousName_0 as string,",
+				"          PreviousName_1 as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['CID'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 3,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> UpdateCurrentName",
+				"SelectNewRecords sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          CID as integer,",
+				"          Name as string,",
+				"          EmailID as string,",
+				"          PreviousName_0 as string,",
+				"          PreviousName_1 as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> InsertNewRecords"
+			]
+		}
+	}
+}

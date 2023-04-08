@@ -1,0 +1,93 @@
+{
+	"name": "REST_API_EXAMPLE",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"supportRFC5988": "true"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "REST_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"relativeURL": "mexico"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "GENERIC_ADLS_CSV_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderPath": "REST_OUTPUT"
+						}
+					}
+				]
+			},
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://prod-16.eastus.logic.azure.com:443/workflows/337ef42c1aff437e86d3c5f51fb81b8c/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=JOfrZpl_s260LeGLEVSTavrYqlOPQxevudwtAytGa4o",
+					"method": "POST",
+					"body": {
+						"PipelineName": "Rest_API_Example",
+						"status": "True",
+						"RecepientEmailID": "realowded@gmail.com"
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-04-02T04:25:04Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

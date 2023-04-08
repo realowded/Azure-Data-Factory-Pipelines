@@ -1,0 +1,68 @@
+{
+	"name": "GetCustomerID 100 200",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Sales_Customer_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "CustomerFile"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "SQL_DB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "EvenCustomerID"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DetEvenCustomerID"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CustomerID as integer,",
+				"          NameStyle as string,",
+				"          Title as string,",
+				"          FirstName as string,",
+				"          MiddleName as string,",
+				"          LastName as string,",
+				"          Suffix as string,",
+				"          CompanyName as string,",
+				"          SalesPerson as string,",
+				"          EmailAddress as string,",
+				"          Phone as string,",
+				"          PasswordHash as string,",
+				"          PasswordSalt as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> CustomerFile",
+				"CustomerFile filter(CustomerID%2==0) ~> DetEvenCustomerID",
+				"DetEvenCustomerID sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'saleslt',",
+				"     tableName: 'EvenCustomerID',",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     recreate: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> EvenCustomerID"
+			]
+		}
+	}
+}

@@ -1,0 +1,101 @@
+{
+	"name": "ProdcutCategory",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ProductCsv",
+						"type": "DatasetReference"
+					},
+					"name": "ProductCSV"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ProductResult",
+						"type": "DatasetReference"
+					},
+					"name": "ProductResultfolder"
+				}
+			],
+			"transformations": [
+				{
+					"name": "GroupByProductCategory"
+				},
+				{
+					"name": "NonBlueProduct"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "lookup1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ProductID as integer,",
+				"          Name as string,",
+				"          ProductNumber as string,",
+				"          Color as string,",
+				"          StandardCost as string,",
+				"          ListPrice as string,",
+				"          Size as string,",
+				"          Weight as string,",
+				"          ProductCategoryID as string,",
+				"          ProductModelID as string,",
+				"          SellStartDate as string,",
+				"          SellEndDate as string,",
+				"          DiscontinuedDate as string,",
+				"          ThumbNailPhoto as string,",
+				"          ThumbnailPhotoFileName as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> ProductCSV",
+				"NonBlueProduct aggregate(groupBy(ProductCategoryID),",
+				"     ListPrice = max(ListPrice)) ~> GroupByProductCategory",
+				"ProductCSV filter(Color!='Blue') ~> NonBlueProduct",
+				"lookup1 select(mapColumn(",
+				"          ProductCategoryID = GroupByProductCategory@ProductCategoryID,",
+				"          ListPrice = ProductCSV@ListPrice,",
+				"          ListPriceMax = GroupByProductCategory@ListPrice,",
+				"          Name,",
+				"          ProductNumber,",
+				"          Color,",
+				"          StandardCost,",
+				"          Size,",
+				"          Weight,",
+				"          ProductModelID,",
+				"          SellStartDate,",
+				"          DiscontinuedDate,",
+				"          ThumbNailPhoto,",
+				"          ThumbnailPhotoFileName,",
+				"          rowguid,",
+				"          ModifiedDate",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"GroupByProductCategory, ProductCSV lookup(GroupByProductCategory@ProductCategoryID == ProductCSV@ProductCategoryID,",
+				"     multiple: false,",
+				"     pickup: 'first',",
+				"     desc(ProductCSV@ListPrice, true),",
+				"     broadcast: 'auto')~> lookup1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['SingleProduct'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> ProductResultfolder"
+			]
+		}
+	}
+}
