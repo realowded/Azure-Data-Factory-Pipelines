@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "DeepakDataEngineering"
+		},
+		"ADLS_LS_accountKey": {
+			"value": ""
+		},
+		"DeepakDataEngineerinDb2_connectionString": {
+			"value": ""
+		},
+		"SQL_DB_LS_connectionString": {
+			"value": ""
+		},
+		"ADLS_LS_properties_typeProperties_url": {
+			"value": "https://adlscsv.dfs.core.windows.net/"
+		},
+		"RestService_LINK_properties_typeProperties_url": {
+			"value": "https://restcountries.com/v3.1/name"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
