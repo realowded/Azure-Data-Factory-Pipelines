@@ -1,0 +1,89 @@
+{
+	"name": "Assignement 10 Q2",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEachCountry",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('Countries')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "CopyCurrentCountry",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "RestSource",
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET"
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DynamicRestCountry",
+									"type": "DatasetReference",
+									"parameters": {
+										"CountryName": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DynamicJSON_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileName": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"Countries": {
+				"type": "Array",
+				"defaultValue": [
+					"india",
+					"us",
+					"uk",
+					"china",
+					"russia"
+				]
+			}
+		},
+		"annotations": []
+	}
+}
