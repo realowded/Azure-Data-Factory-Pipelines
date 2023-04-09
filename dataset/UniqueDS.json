@@ -1,0 +1,19 @@
+{
+	"name": "UniqueDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "Newest",
+				"fileSystem": "landing"
+			}
+		},
+		"schema": {}
+	}
+}
