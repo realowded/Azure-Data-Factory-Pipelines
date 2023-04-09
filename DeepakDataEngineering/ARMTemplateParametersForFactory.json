@@ -17,8 +17,11 @@
 		"ADLS_LS_properties_typeProperties_url": {
 			"value": "https://adlscsv.dfs.core.windows.net/"
 		},
+		"DynamicRestLink_Service_properties_typeProperties_url": {
+			"value": "https://restcountries.com/v3.1/name/"
+		},
 		"RestService_LINK_properties_typeProperties_url": {
-			"value": "https://restcountries.com/v3.1/name"
+			"value": "https://restcountries.com/v3.1/all"
 		}
 	}
 }

@@ -23,9 +23,13 @@
 			"type": "string",
 			"defaultValue": "https://adlscsv.dfs.core.windows.net/"
 		},
+		"DynamicRestLink_Service_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://restcountries.com/v3.1/name/"
+		},
 		"RestService_LINK_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://restcountries.com/v3.1/name"
+			"defaultValue": "https://restcountries.com/v3.1/all"
 		},
 		"containerUri": {
 			"type": "string",
@@ -65,6 +69,9 @@
 					},
 					"ADLS_LS_properties_typeProperties_url": {
 						"value": "[parameters('ADLS_LS_properties_typeProperties_url')]"
+					},
+					"DynamicRestLink_Service_properties_typeProperties_url": {
+						"value": "[parameters('DynamicRestLink_Service_properties_typeProperties_url')]"
 					},
 					"RestService_LINK_properties_typeProperties_url": {
 						"value": "[parameters('RestService_LINK_properties_typeProperties_url')]"
@@ -111,6 +118,26 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'DeepakDataEngineering_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "DeepakDataEngineering_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'DeepakDataEngineering_ArmTemplate_2')]"
 			]
 		}
 	]
