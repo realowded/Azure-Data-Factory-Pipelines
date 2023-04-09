@@ -1,0 +1,12 @@
+{
+	"name": "RestCounty_DS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "RestService_LINK",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"schema": []
+	}
+}
