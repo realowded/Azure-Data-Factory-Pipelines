@@ -1,11 +1,6 @@
 {
 	"name": "DynamicRestLink_Service",
 	"properties": {
-		"parameters": {
-			"CountryName": {
-				"type": "string"
-			}
-		},
 		"annotations": [],
 		"type": "RestService",
 		"typeProperties": {
